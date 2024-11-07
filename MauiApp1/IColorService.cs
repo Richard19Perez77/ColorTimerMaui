@@ -4,5 +4,7 @@
     {
         Color GetRandomWarmColor();
         Color GetRandomCoolColor();
+        public bool GetIsWarm();
+        void ToggleIsWarm();
     }
 }

@@ -6,15 +6,12 @@ namespace MauiApp1
     {
 
         private readonly IColorService _colorService;
-        private bool _isWarm;
 
         public MainPage()
         {
             InitializeComponent();
-            _isWarm = false;
             TimerService.Instance.Elapsed += OnTimerElapsed;
             _colorService = new ColorService();
-            _isWarm = false;
             Dispatcher.Dispatch(() =>
             {
                 ColorToneLabel.Text = "Cool Colors";
@@ -28,7 +25,7 @@ namespace MauiApp1
             {
                 TimerLabel.Text = DateTime.Now.ToString("HH:mm:ss.fff");
 
-                if (_isWarm)
+                if (_colorService.GetIsWarm())
                 {
                     var randomColor = _colorService.GetRandomWarmColor();
                     BackgroundColor = randomColor;
@@ -56,21 +53,26 @@ namespace MauiApp1
 
         private void OnScreenTapped(object? sender, EventArgs e)
         {
-            _isWarm = !_isWarm;
-            if (_isWarm)
+            _colorService.ToggleIsWarm();
+            if (_colorService.GetIsWarm())
             {
-                ColorToneLabel.Text = "Warm Colors";
+                Dispatcher.Dispatch(() =>
+                {
+                    ColorToneLabel.Text = "Warm Colors";
+                });
             }
             else
             {
-                ColorToneLabel.Text = "Cool Colors";
+                Dispatcher.Dispatch(() =>
+                {
+                    ColorToneLabel.Text = "Cool Colors";
+                });
             }
         }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
-
         }
 
         protected override void OnDisappearing()
