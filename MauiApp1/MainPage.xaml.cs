@@ -5,21 +5,21 @@ namespace MauiApp1
     public partial class MainPage : ContentPage
     {
 
-        private readonly ITimerService _timerService;
         private readonly IColorService _colorService;
         private bool _isWarm;
-        private bool _doRunColorTimer;
 
         public MainPage()
         {
             InitializeComponent();
             _isWarm = false;
-            _timerService = new TimerService(16);
-            _timerService.Elapsed += OnTimerElapsed;
-            _timerService.Start();
+            TimerService.Instance.Elapsed += OnTimerElapsed;
             _colorService = new ColorService();
             _isWarm = false;
-            _doRunColorTimer = false;
+            Dispatcher.Dispatch(() =>
+            {
+                ColorToneLabel.Text = "Cool Colors";
+                TimerLabel.Text = DateTime.Now.ToString("HH:mm:ss.fff");
+            });
         }
 
         private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
@@ -51,20 +51,7 @@ namespace MauiApp1
 
         private void OnDoubleTapped(object? sender, EventArgs e)
         {
-            _doRunColorTimer = !_doRunColorTimer;
-            if (_doRunColorTimer)
-            {
-                _timerService.Start();
-            } else
-            {
-                _timerService.Stop();
-                Dispatcher.Dispatch(() =>
-                {
-                    BackgroundColor = Colors.Black;
-                    TimerLabel.TextColor = Colors.White;
-                    ColorToneLabel.TextColor = Colors.White;
-                });
-            }
+            TimerService.Instance.ToggleDoRunColorTimer();
         }
 
         private void OnScreenTapped(object? sender, EventArgs e)
@@ -80,14 +67,15 @@ namespace MauiApp1
             }
         }
 
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+        }
+
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            if (_doRunColorTimer)
-            {
-                _timerService.Stop();
-                _doRunColorTimer = false;
-            }
         }
     }
 }

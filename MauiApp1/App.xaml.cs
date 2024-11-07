@@ -8,5 +8,11 @@
 
             MainPage = new AppShell();
         }
+
+        protected override void OnSleep()
+        {
+            base.OnSleep();
+            TimerService.Instance.OnSleep();
+        }
     }
 }
