@@ -4,10 +4,11 @@
              BackgroundColor="Black">
     <Grid>
         <Grid.GestureRecognizers>
-            <TapGestureRecognizer Tapped="OnScreenTapped"/>
+            <TapGestureRecognizer Tapped="OnScreenTapped" NumberOfTapsRequired="1"/>
+            <TapGestureRecognizer Tapped="OnDoubleTapped" NumberOfTapsRequired="2" />
         </Grid.GestureRecognizers>
-   
-    <StackLayout x:Name="Layout" VerticalOptions="Center" HorizontalOptions="Center">
+
+        <StackLayout x:Name="Layout" VerticalOptions="Center" HorizontalOptions="Center">
         <Label x:Name="TimerLabel"
                Text="00:00:00"
                TextColor="White"

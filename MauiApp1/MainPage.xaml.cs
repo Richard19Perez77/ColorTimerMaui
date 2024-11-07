@@ -1,24 +1,25 @@
-﻿using System;
-using System.Timers;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Controls.Compatibility;
+﻿using System.Timers;
 
 namespace MauiApp1
 {
     public partial class MainPage : ContentPage
     {
-        private System.Timers.Timer _timer;
-        private Random _random;
+
+        private readonly ITimerService _timerService;
+        private readonly IColorService _colorService;
         private bool _isWarm;
+        private bool _doRunColorTimer;
 
         public MainPage()
         {
             InitializeComponent();
-            _timer = new System.Timers.Timer(16);
-            _timer.Elapsed += OnTimerElapsed;
-            _timer.Start();
-            _random = new Random();
             _isWarm = false;
+            _timerService = new TimerService(16);
+            _timerService.Elapsed += OnTimerElapsed;
+            _timerService.Start();
+            _colorService = new ColorService();
+            _isWarm = false;
+            _doRunColorTimer = false;
         }
 
         private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
@@ -29,18 +30,18 @@ namespace MauiApp1
 
                 if (_isWarm)
                 {
-                    var randomColor = GetRandomWarmColor();
+                    var randomColor = _colorService.GetRandomWarmColor();
                     BackgroundColor = randomColor;
-                    randomColor = GetRandomWarmColor();
+                    randomColor = _colorService.GetRandomWarmColor();
                     TimerLabel.TextColor = randomColor;
                     ColorToneLabel.TextColor = randomColor;
                     ColorToneLabel.Text = "Warm Colors";
                 }
                 else
                 {
-                    var randomColor = GetRandomCoolColor();
+                    var randomColor = _colorService.GetRandomCoolColor();
                     BackgroundColor = randomColor;
-                    randomColor = GetRandomCoolColor();
+                    randomColor = _colorService.GetRandomCoolColor();
                     TimerLabel.TextColor = randomColor;
                     ColorToneLabel.TextColor = randomColor;
                     ColorToneLabel.Text = "Cool Colors";
@@ -48,31 +49,45 @@ namespace MauiApp1
             });
         }
 
-        private Color GetRandomWarmColor()
+        private void OnDoubleTapped(object? sender, EventArgs e)
         {
-            var r = _random.NextDouble();
-            var g = _random.NextDouble();
-            var b = _random.NextDouble() * r;
-            return new Color((float)r, (float)g, (float)b); // Random color with RGB values between 0 and 1
-        }
-
-        private Color GetRandomCoolColor()
-        {
-            var b = _random.NextDouble();
-            var g = _random.NextDouble();
-            var r = _random.NextDouble() * b;
-            return new Color((float)r, (float)g, (float)b); // Random color with RGB values between 0 and 1
+            _doRunColorTimer = !_doRunColorTimer;
+            if (_doRunColorTimer)
+            {
+                _timerService.Start();
+            } else
+            {
+                _timerService.Stop();
+                Dispatcher.Dispatch(() =>
+                {
+                    BackgroundColor = Colors.Black;
+                    TimerLabel.TextColor = Colors.White;
+                    ColorToneLabel.TextColor = Colors.White;
+                });
+            }
         }
 
         private void OnScreenTapped(object? sender, EventArgs e)
         {
-            _isWarm = !_isWarm;  // Toggle the value of the local variable
+            _isWarm = !_isWarm;
+            if (_isWarm)
+            {
+                ColorToneLabel.Text = "Warm Colors";
+            }
+            else
+            {
+                ColorToneLabel.Text = "Cool Colors";
+            }
         }
 
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            _timer?.Stop();
+            if (_doRunColorTimer)
+            {
+                _timerService.Stop();
+                _doRunColorTimer = false;
+            }
         }
     }
 }
